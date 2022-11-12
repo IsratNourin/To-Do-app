@@ -6,6 +6,7 @@ import {
   View,
   TextInput,
   Button,
+  Alert,
 } from "react-native";
 import Modal from "react-native-modal";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -29,6 +30,16 @@ export const CreateTask: FC<CreateTaskProps> = (props) => {
   const [calenderSelect, setCalanderSelect] = useState<boolean>(false);
 
   const createTaskHandler = () => {
+    if (task === "") {
+      Alert.alert("Please enter a task");
+      return;
+    } else if (selectedDate === "") {
+      Alert.alert("Please select a date");
+      return;
+    } else if (taskDetails === "") {
+      Alert.alert("Please enter task details");
+      return;
+    }
     var parsed_date: string = new Date(selectedDate).toISOString();
     const data: TodoData = {
       title: task,
@@ -42,6 +53,9 @@ export const CreateTask: FC<CreateTaskProps> = (props) => {
       .then((response: any) => {
         console.log(response.data);
         setVisibleModal(false);
+        setTask("");
+        setTaskDetails("");
+        setSelectedDate("");
 
         /* Refresh the list */
         var tempTodos: TodoData[] = [];
@@ -78,7 +92,7 @@ export const CreateTask: FC<CreateTaskProps> = (props) => {
       <Modal isVisible={visibleModal === true} style={styles.bottomModal}>
         <View style={styles.modalContent}>
           <View style={styles.taskHeader}>
-            <Text>Create Task</Text>
+            <Text style={styles.createTask}>Create Task</Text>
             {/* {this._renderButton("Close", () =>
                 this.setState({ visibleModal: null })
             )} */}
@@ -181,6 +195,12 @@ const styles = StyleSheet.create({
   taskTitle: {
     justifyContent: "flex-start",
     marginTop: 20,
+    fontFamily: "Gilroy-Regular",
+  },
+  createTask: {
+    fontFamily: "Gilroy-Bold",
+    fontSize: 18,
+    color: "#837c7c",
   },
   input: {
     marginTop: 10,

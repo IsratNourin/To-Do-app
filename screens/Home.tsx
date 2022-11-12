@@ -6,42 +6,29 @@ import {
   TouchableOpacity,
   View,
   ToastAndroid,
+  Image,
 } from "react-native";
-import Task from "../components/Task";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useFonts } from "expo-font";
 
+import Task from "../components/Task";
 import TodoAppService from "../api/api.service";
 import TodoData from "../types/TodoData.type";
 import { CreateTask } from "../components/CreateTask";
-import { TaskDetails } from "./TaskDetails";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import AppLoading from "expo-app-loading";
 import { TaskDetailsParamsList } from "../App";
 
 type HomeProps = NativeStackScreenProps<TaskDetailsParamsList, "Home">;
 
 export const Home: FC<HomeProps> = (props) => {
-  const [task, setTask] = useState<string>("");
   const [visibleModal, setVisibleModal] = useState<boolean>(false);
+  const [emptyList, setEmptyList] = useState<boolean>(true);
   const [todos, setTodos] = useState<TodoData[]>([]);
-
-  // const handleAddTask = () => {
-  //   Keyboard.dismiss();
-  //   setTaskItems([...taskItems, task]);
-  //   setTask("");
-  // };
-
-  const completeTask = (index: number) => {
-    TodoAppService.delete(index)
-      .then((response: any) => {
-        console.log(response.data);
-      })
-      .catch((e: Error) => {
-        console.log(e);
-      });
-
-    let itemsCopy = [...todos];
-    itemsCopy.splice(index, 1);
-    setTodos(itemsCopy);
-  };
+  const [loaded] = useFonts({
+    "Gilroy-Regular": require("../assets/fonts/Gilroy-Regular.ttf"),
+    "Gilroy-Bold": require("../assets/fonts/Gilroy-Bold.ttf"),
+  });
 
   useEffect(() => {
     // getTodos();
@@ -50,6 +37,9 @@ export const Home: FC<HomeProps> = (props) => {
 
     TodoAppService.getAll()
       .then((response: any) => {
+        if (response.data.items.length > 0) {
+          setEmptyList(false);
+        }
         response.data.items.map((item: TodoData) => {
           tempTaskItems.push(item.title);
           tempTodos.push(item);
@@ -63,53 +53,122 @@ export const Home: FC<HomeProps> = (props) => {
       });
   }, [todos]);
 
-  return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Tasks To Do</Text>
+  if (!loaded) {
+    return <AppLoading />;
+  }
 
-        <View style={styles.items}>
-          {todos.map((item, index) => {
-            return (
-              //   <TouchableOpacity
-              //     key={index}
-              //     onPress={() => completeTask(item.id!)}
-              //   >
-              <TouchableOpacity
-                key={index}
-                onPress={() =>
-                  props.navigation.push("TaskDetails", {
-                    id: item.id!,
-                  })
-                }
-              >
-                <Task todoItem={item} todos={todos} setTodos={setTodos} />
-              </TouchableOpacity>
-              //   </TouchableOpacity>
-            );
-          })}
+  if (emptyList) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.sectionRow}>
+            <Ionicons
+              style={{ marginTop: 5, marginRight: 10 }}
+              name="checkmark-circle"
+              size={24}
+              color="#0096c7"
+            />
+
+            <Text style={styles.headerText}>Tasks To Do</Text>
+          </View>
+
+          <View
+            style={{
+              borderBottomColor: "black",
+              borderBottomWidth: StyleSheet.hairlineWidth,
+              marginTop: 10,
+            }}
+          />
         </View>
+        <View style={styles.emptyList}>
+          <Image source={require("../assets/background.png")} />
+          <Text>Nothing to Show</Text>
+        </View>
+
+        {/* Create a todo task */}
+        <CreateTask
+          visibleModal={visibleModal}
+          setVisibleModal={setVisibleModal}
+          setTodos={setTodos}
+        />
+
+        <TouchableOpacity
+          onPress={() => {
+            setVisibleModal(true);
+          }}
+        >
+          <View style={styles.addWrapper}>
+            <Text style={styles.addText}>+</Text>
+          </View>
+        </TouchableOpacity>
       </View>
+    );
+  } else {
+    return (
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.sectionRow}>
+            <Ionicons
+              style={{ marginTop: 5, marginRight: 10 }}
+              name="checkmark-circle"
+              size={24}
+              color="#0096c7"
+            />
 
-      {/* Create a todo task */}
-      <CreateTask
-        visibleModal={visibleModal}
-        setVisibleModal={setVisibleModal}
-        setTodos={setTodos}
-      />
+            <Text style={styles.headerText}>Tasks To Do</Text>
+          </View>
 
-      <TouchableOpacity
-        onPress={() => {
-          setVisibleModal(true);
-        }}
-      >
-        <View style={styles.addWrapper}>
-          <Text style={styles.addText}>+</Text>
+          <View
+            style={{
+              borderBottomColor: "black",
+              borderBottomWidth: StyleSheet.hairlineWidth,
+              marginTop: 10,
+            }}
+          />
+
+          <View style={styles.items}>
+            {todos.map((item, index) => {
+              return (
+                //   <TouchableOpacity
+                //     key={index}
+                //     onPress={() => completeTask(item.id!)}
+                //   >
+                <TouchableOpacity
+                  key={index}
+                  onPress={() =>
+                    props.navigation.push("TaskDetails", {
+                      id: item.id!,
+                    })
+                  }
+                >
+                  <Task todoItem={item} todos={todos} setTodos={setTodos} />
+                </TouchableOpacity>
+                //   </TouchableOpacity>
+              );
+            })}
+          </View>
         </View>
-      </TouchableOpacity>
-    </View>
-  );
+
+        {/* Create a todo task */}
+        <CreateTask
+          visibleModal={visibleModal}
+          setVisibleModal={setVisibleModal}
+          setTodos={setTodos}
+        />
+
+        <TouchableOpacity
+          onPress={() => {
+            setVisibleModal(true);
+          }}
+        >
+          <View style={styles.addWrapper}>
+            <Text style={styles.addText}>+</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 };
 
 const styles = StyleSheet.create({
@@ -123,9 +182,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
+  sectionRow: {
+    flexDirection: "row",
+  },
   headerText: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: "Gilroy-Bold",
+    color: "#837c7c",
   },
 
   items: {
@@ -165,5 +228,11 @@ const styles = StyleSheet.create({
   addText: {
     fontSize: 30,
     color: "#0096c7",
+  },
+  emptyList: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
   },
 });

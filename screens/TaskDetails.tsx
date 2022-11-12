@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
     backgroundColor: "green",
     padding: 10,
     borderRadius: 10,
+    fontFamily: "Gilroy-Bold",
   },
 
   notCompleted: {
@@ -148,14 +149,15 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
     padding: 10,
     borderRadius: 10,
+    fontFamily: "Gilroy-Bold",
   },
 
   textTitle: {
     marginHorizontal: 10,
     marginVertical: 15,
     fontSize: 14,
-    fontWeight: "bold",
     color: "#0096c7",
+    fontFamily: "Gilroy-Regular",
   },
 
   inputDescription: {
@@ -167,6 +169,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderColor: "#48cae4",
     borderWidth: 1,
+    fontFamily: "Gilroy-Regular",
   },
 
   updateTask: {
